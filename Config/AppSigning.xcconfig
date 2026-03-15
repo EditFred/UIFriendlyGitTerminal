@@ -1,0 +1,4 @@
+// HUMHERE: Set a unique bundle identifier that matches your signing or App Store configuration.
+PRODUCT_BUNDLE_IDENTIFIER = com.editfred.UIFriendlyGitTerminal
+// HUMHERE: Set your Apple Developer Team ID before signing or archiving from Xcode.
+DEVELOPMENT_TEAM =

@@ -1,0 +1,525 @@
+// !$*UTF8*$!
+{
+	objectVersion = 56;
+	classes = {
+	};
+	archiveVersion = 1;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		A00000000000000000000016 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000009 /* ContentView.swift */; };
+		A00000000000000000000017 /* RepositoryViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0000000000000000000000A /* RepositoryViewModel.swift */; };
+		A00000000000000000000018 /* GitVibesApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0000000000000000000000B /* GitVibesApp.swift */; };
+		A00000000000000000000019 /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0000000000000000000000C /* Models.swift */; };
+		A0000000000000000000001A /* GitParsing.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0000000000000000000000D /* GitParsing.swift */; };
+		A0000000000000000000001B /* GitCommand.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0000000000000000000000E /* GitCommand.swift */; };
+		A0000000000000000000001C /* GitRepositoryService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0000000000000000000000F /* GitRepositoryService.swift */; };
+		A0000000000000000000001D /* GitVibesCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A00000000000000000000013 /* GitVibesCore.framework */; };
+		A0000000000000000000001E /* GitVibesCore.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = A00000000000000000000013 /* GitVibesCore.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		A0000000000000000000001F /* GitParsingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000010 /* GitParsingTests.swift */; };
+		A00000000000000000000020 /* GitCommandTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000011 /* GitCommandTests.swift */; };
+		A00000000000000000000021 /* GitVibesCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A00000000000000000000013 /* GitVibesCore.framework */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		A0000000000000000000002C /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = A00000000000000000000001 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = A00000000000000000000039;
+			remoteInfo = GitVibesCore;
+		};
+		A0000000000000000000002E /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = A00000000000000000000001 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = A00000000000000000000039;
+			remoteInfo = GitVibesCore;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		A00000000000000000000024 /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				A0000000000000000000001E /* GitVibesCore.framework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		A00000000000000000000009 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		A0000000000000000000000A /* RepositoryViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RepositoryViewModel.swift; sourceTree = "<group>"; };
+		A0000000000000000000000B /* GitVibesApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GitVibesApp.swift; sourceTree = "<group>"; };
+		A0000000000000000000000C /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
+		A0000000000000000000000D /* GitParsing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GitParsing.swift; sourceTree = "<group>"; };
+		A0000000000000000000000E /* GitCommand.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GitCommand.swift; sourceTree = "<group>"; };
+		A0000000000000000000000F /* GitRepositoryService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GitRepositoryService.swift; sourceTree = "<group>"; };
+		A00000000000000000000010 /* GitParsingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GitParsingTests.swift; sourceTree = "<group>"; };
+		A00000000000000000000011 /* GitCommandTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GitCommandTests.swift; sourceTree = "<group>"; };
+		A00000000000000000000012 /* AppSigning.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = AppSigning.xcconfig; sourceTree = "<group>"; };
+		A00000000000000000000013 /* GitVibesCore.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = GitVibesCore.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		A00000000000000000000014 /* UIFriendlyGitTerminal.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = UIFriendlyGitTerminal.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		A00000000000000000000015 /* GitVibesCoreTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = GitVibesCoreTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		A00000000000000000000023 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A0000000000000000000001D /* GitVibesCore.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A00000000000000000000027 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A00000000000000000000029 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A00000000000000000000021 /* GitVibesCore.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		A00000000000000000000002 = {
+			isa = PBXGroup;
+			children = (
+				A00000000000000000000004 /* Sources */,
+				A00000000000000000000007 /* Tests */,
+				A00000000000000000000008 /* Config */,
+				A00000000000000000000003 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		A00000000000000000000003 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				A00000000000000000000014 /* UIFriendlyGitTerminal.app */,
+				A00000000000000000000013 /* GitVibesCore.framework */,
+				A00000000000000000000015 /* GitVibesCoreTests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		A00000000000000000000004 /* Sources */ = {
+			isa = PBXGroup;
+			children = (
+				A00000000000000000000005 /* UIFriendlyGitTerminal */,
+				A00000000000000000000006 /* GitVibesCore */,
+			);
+			path = Sources;
+			sourceTree = "<group>";
+		};
+		A00000000000000000000005 /* UIFriendlyGitTerminal */ = {
+			isa = PBXGroup;
+			children = (
+				A00000000000000000000009 /* ContentView.swift */,
+				A0000000000000000000000A /* RepositoryViewModel.swift */,
+				A0000000000000000000000B /* GitVibesApp.swift */,
+			);
+			path = UIFriendlyGitTerminal;
+			sourceTree = "<group>";
+		};
+		A00000000000000000000006 /* GitVibesCore */ = {
+			isa = PBXGroup;
+			children = (
+				A0000000000000000000000C /* Models.swift */,
+				A0000000000000000000000D /* GitParsing.swift */,
+				A0000000000000000000000E /* GitCommand.swift */,
+				A0000000000000000000000F /* GitRepositoryService.swift */,
+			);
+			path = GitVibesCore;
+			sourceTree = "<group>";
+		};
+		A00000000000000000000007 /* Tests */ = {
+			isa = PBXGroup;
+			children = (
+				A00000000000000000000030 /* GitVibesCoreTests */,
+			);
+			path = Tests;
+			sourceTree = "<group>";
+		};
+		A00000000000000000000008 /* Config */ = {
+			isa = PBXGroup;
+			children = (
+				A00000000000000000000012 /* AppSigning.xcconfig */,
+			);
+			path = Config;
+			sourceTree = "<group>";
+		};
+		A00000000000000000000030 /* GitVibesCoreTests */ = {
+			isa = PBXGroup;
+			children = (
+				A00000000000000000000010 /* GitParsingTests.swift */,
+				A00000000000000000000011 /* GitCommandTests.swift */,
+			);
+			path = GitVibesCoreTests;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		A00000000000000000000038 /* UIFriendlyGitTerminal */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = A00000000000000000000032 /* Build configuration list for PBXNativeTarget "UIFriendlyGitTerminal" */;
+			buildPhases = (
+				A00000000000000000000022 /* Sources */,
+				A00000000000000000000023 /* Frameworks */,
+				A00000000000000000000024 /* Embed Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				A0000000000000000000002D /* PBXTargetDependency */,
+			);
+			name = UIFriendlyGitTerminal;
+			packageProductDependencies = (
+			);
+			productName = UIFriendlyGitTerminal;
+			productReference = A00000000000000000000014 /* UIFriendlyGitTerminal.app */;
+			productType = "com.apple.product-type.application";
+		};
+		A00000000000000000000039 /* GitVibesCore */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = A00000000000000000000035 /* Build configuration list for PBXNativeTarget "GitVibesCore" */;
+			buildPhases = (
+				A00000000000000000000026 /* Sources */,
+				A00000000000000000000027 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = GitVibesCore;
+			packageProductDependencies = (
+			);
+			productName = GitVibesCore;
+			productReference = A00000000000000000000013 /* GitVibesCore.framework */;
+			productType = "com.apple.product-type.framework";
+		};
+		A0000000000000000000003A /* GitVibesCoreTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = A00000000000000000000037 /* Build configuration list for PBXNativeTarget "GitVibesCoreTests" */;
+			buildPhases = (
+				A00000000000000000000028 /* Sources */,
+				A00000000000000000000029 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				A0000000000000000000002F /* PBXTargetDependency */,
+			);
+			name = GitVibesCoreTests;
+			packageProductDependencies = (
+			);
+			productName = GitVibesCoreTests;
+			productReference = A00000000000000000000015 /* GitVibesCoreTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		A00000000000000000000001 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1600;
+				LastUpgradeCheck = 1600;
+				TargetAttributes = {
+					A00000000000000000000038 = {
+						CreatedOnToolsVersion = 16.0;
+					};
+					A00000000000000000000039 = {
+						CreatedOnToolsVersion = 16.0;
+					};
+					A0000000000000000000003A = {
+						CreatedOnToolsVersion = 16.0;
+					};
+				};
+			};
+			buildConfigurationList = A00000000000000000000031 /* Build configuration list for PBXProject "UIFriendlyGitTerminal" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = A00000000000000000000002;
+			productRefGroup = A00000000000000000000003 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				A00000000000000000000038 /* UIFriendlyGitTerminal */,
+				A00000000000000000000039 /* GitVibesCore */,
+				A0000000000000000000003A /* GitVibesCoreTests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		A00000000000000000000022 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A00000000000000000000016 /* ContentView.swift in Sources */,
+				A00000000000000000000017 /* RepositoryViewModel.swift in Sources */,
+				A00000000000000000000018 /* GitVibesApp.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A00000000000000000000026 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A00000000000000000000019 /* Models.swift in Sources */,
+				A0000000000000000000001A /* GitParsing.swift in Sources */,
+				A0000000000000000000001B /* GitCommand.swift in Sources */,
+				A0000000000000000000001C /* GitRepositoryService.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A00000000000000000000028 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A0000000000000000000001F /* GitParsingTests.swift in Sources */,
+				A00000000000000000000020 /* GitCommandTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		A0000000000000000000002D /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = A00000000000000000000039 /* GitVibesCore */;
+			targetProxy = A0000000000000000000002C /* PBXContainerItemProxy */;
+		};
+		A0000000000000000000002F /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = A00000000000000000000039 /* GitVibesCore */;
+			targetProxy = A0000000000000000000002E /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		A00000000000000000000033 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+				SWIFT_VERSION = 6.0;
+			};
+			name = Debug;
+		};
+		A00000000000000000000034 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				SDKROOT = macosx;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 6.0;
+			};
+			name = Release;
+		};
+		A0000000000000000000003B /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = A00000000000000000000012 /* AppSigning.xcconfig */;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = "Git Vibes";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.developer-tools";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 6.0;
+			};
+			name = Debug;
+		};
+		A0000000000000000000003C /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = A00000000000000000000012 /* AppSigning.xcconfig */;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = "Git Vibes";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.developer-tools";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 6.0;
+			};
+			name = Release;
+		};
+		A0000000000000000000003D /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUILD_LIBRARY_FOR_DISTRIBUTION = NO;
+				DEFINES_MODULE = YES;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@loader_path/Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.editfred.GitVibesCore;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SKIP_INSTALL = YES;
+				SWIFT_INSTALL_OBJC_HEADER = NO;
+				SWIFT_VERSION = 6.0;
+			};
+			name = Debug;
+		};
+		A0000000000000000000003E /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUILD_LIBRARY_FOR_DISTRIBUTION = NO;
+				DEFINES_MODULE = YES;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@loader_path/Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.editfred.GitVibesCore;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SKIP_INSTALL = YES;
+				SWIFT_INSTALL_OBJC_HEADER = NO;
+				SWIFT_VERSION = 6.0;
+			};
+			name = Release;
+		};
+		A0000000000000000000003F /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "";
+				CODE_SIGN_STYLE = Automatic;
+				GENERATE_INFOPLIST_FILE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.editfred.GitVibesCoreTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SWIFT_VERSION = 6.0;
+				TEST_HOST = "";
+			};
+			name = Debug;
+		};
+		A00000000000000000000040 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "";
+				CODE_SIGN_STYLE = Automatic;
+				GENERATE_INFOPLIST_FILE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.editfred.GitVibesCoreTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SWIFT_VERSION = 6.0;
+				TEST_HOST = "";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		A00000000000000000000031 /* Build configuration list for PBXProject "UIFriendlyGitTerminal" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A00000000000000000000033 /* Debug */,
+				A00000000000000000000034 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		A00000000000000000000032 /* Build configuration list for PBXNativeTarget "UIFriendlyGitTerminal" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A0000000000000000000003B /* Debug */,
+				A0000000000000000000003C /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		A00000000000000000000035 /* Build configuration list for PBXNativeTarget "GitVibesCore" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A0000000000000000000003D /* Debug */,
+				A0000000000000000000003E /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		A00000000000000000000037 /* Build configuration list for PBXNativeTarget "GitVibesCoreTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A0000000000000000000003F /* Debug */,
+				A00000000000000000000040 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = A00000000000000000000001 /* Project object */;
+}
