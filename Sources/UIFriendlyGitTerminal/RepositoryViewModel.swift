@@ -54,7 +54,7 @@ final class RepositoryViewModel: ObservableObject {
         }
 
         runTask(label: "Refresh") {
-            let snapshot = try service.loadSnapshot(for: folder)
+            let snapshot = try self.service.loadSnapshot(for: folder)
             await MainActor.run {
                 self.snapshot = snapshot
                 self.selectedFolderURL = URL(fileURLWithPath: snapshot.rootPath, isDirectory: true)
@@ -117,8 +117,8 @@ final class RepositoryViewModel: ObservableObject {
         }
 
         runTask(label: command.label) {
-            let result = try service.perform(command, in: folder)
-            let snapshot = try service.loadSnapshot(for: folder)
+            let result = try self.service.perform(command, in: folder)
+            let snapshot = try self.service.loadSnapshot(for: folder)
 
             await MainActor.run {
                 self.snapshot = snapshot
