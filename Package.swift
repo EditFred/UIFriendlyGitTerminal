@@ -27,6 +27,10 @@ let package = Package(
         .testTarget(
             name: "GitVibesCoreTests",
             dependencies: ["GitVibesCore"]
+        ),
+        .testTarget(
+            name: "UIFriendlyGitTerminalTests",
+            dependencies: ["UIFriendlyGitTerminal", "GitVibesCore"]
         )
     ]
 )

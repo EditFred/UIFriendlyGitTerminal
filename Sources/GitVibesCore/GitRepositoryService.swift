@@ -4,6 +4,13 @@ public protocol ShellCommandRunning: Sendable {
     func run(arguments: [String], workingDirectory: URL?) throws -> GitCommandResult
 }
 
+public protocol GitRepositoryServicing: Sendable {
+    func resolveRepositoryRoot(for folder: URL) throws -> URL
+    func loadSnapshot(for folder: URL) throws -> GitRepositorySnapshot
+    func perform(_ command: GitCommand, in folder: URL) throws -> GitCommandResult
+    func cloneRepository(from repositoryURL: String, into destinationFolder: URL) throws -> URL
+}
+
 public enum GitServiceError: Error, LocalizedError {
     case notARepository
     case commandFailed(label: String, result: GitCommandResult)
@@ -50,7 +57,7 @@ public struct ProcessRunner: ShellCommandRunning {
     }
 }
 
-public struct GitRepositoryService: Sendable {
+public struct GitRepositoryService: GitRepositoryServicing, Sendable {
     private let runner: any ShellCommandRunning
 
     public init(runner: any ShellCommandRunning = ProcessRunner()) {
@@ -95,6 +102,22 @@ public struct GitRepositoryService: Sendable {
         return result
     }
 
+    public func cloneRepository(from repositoryURL: String, into destinationFolder: URL) throws -> URL {
+        let result = try runner.run(
+            arguments: GitCommand.clone(repositoryURL: repositoryURL).arguments,
+            workingDirectory: destinationFolder
+        )
+        guard result.succeeded else {
+            throw GitServiceError.commandFailed(label: GitCommand.clone(repositoryURL: repositoryURL).label, result: result)
+        }
+
+        guard let repositoryName = Self.repositoryName(from: repositoryURL) else {
+            throw GitServiceError.commandFailed(label: GitCommand.clone(repositoryURL: repositoryURL).label, result: result)
+        }
+
+        return destinationFolder.appendingPathComponent(repositoryName, isDirectory: true)
+    }
+
     private func requiredOutput(for command: GitCommand, in folder: URL, allowEmpty: Bool = false) throws -> String {
         let result = try runner.run(arguments: command.arguments, workingDirectory: folder)
         guard result.succeeded else {
@@ -106,5 +129,32 @@ public struct GitRepositoryService: Sendable {
             throw GitServiceError.commandFailed(label: command.label, result: result)
         }
         return output
+    }
+
+    private static func repositoryName(from repositoryURL: String) -> String? {
+        let trimmedURL = repositoryURL.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmedURL.isEmpty else {
+            return nil
+        }
+
+        let normalizedURL: String
+        if let schemeRange = trimmedURL.range(of: "://") {
+            normalizedURL = String(trimmedURL[schemeRange.upperBound...])
+        } else {
+            normalizedURL = trimmedURL
+        }
+
+        let pathPortion = normalizedURL.split(separator: ":").last.map(String.init) ?? normalizedURL
+        let candidate = pathPortion
+            .split(separator: "/")
+            .last
+            .map(String.init)?
+            .replacingOccurrences(of: ".git", with: "", options: [.anchored, .backwards])
+
+        guard let candidate, !candidate.isEmpty else {
+            return nil
+        }
+
+        return candidate
     }
 }

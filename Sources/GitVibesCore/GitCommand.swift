@@ -5,6 +5,7 @@ public enum GitCommand: Sendable, Equatable {
     case currentBranch
     case listBranches
     case statusShort
+    case clone(repositoryURL: String)
     case pull
     case push
     case commit(message: String)
@@ -21,6 +22,8 @@ public enum GitCommand: Sendable, Equatable {
             return ["branch", "--format=%(refname:short)|%(HEAD)"]
         case .statusShort:
             return ["status", "--short"]
+        case let .clone(repositoryURL):
+            return ["clone", repositoryURL]
         case .pull:
             return ["pull"]
         case .push:
@@ -44,6 +47,8 @@ public enum GitCommand: Sendable, Equatable {
             return "List Branches"
         case .statusShort:
             return "Repo Status"
+        case .clone:
+            return "Clone Repository"
         case .pull:
             return "Pull"
         case .push:

@@ -8,16 +8,26 @@ final class RepositoryViewModel: ObservableObject {
     @Published var selectedFolderURL: URL?
     @Published var snapshot: GitRepositorySnapshot?
     @Published var selectedBranchName = ""
-    @Published var mergeBranchName = ""
+    @Published var mergeSourceBranchName = ""
+    @Published var mergeTargetBranchName = ""
     @Published var commitMessage = ""
+    @Published var cloneRepositoryURL = ""
+    @Published var cloneDestinationURL: URL?
     @Published var outputLog = "Choose a local repository to begin.\n"
     @Published var errorMessage: String?
     @Published var isBusy = false
+    @Published private(set) var recentRepositories: [RecentRepository]
 
-    private let service: GitRepositoryService
+    private let service: any GitRepositoryServicing
+    private let recentRepositoryStore: any RecentRepositoryStoring
 
-    init(service: GitRepositoryService = GitRepositoryService()) {
+    init(
+        service: any GitRepositoryServicing = GitRepositoryService(),
+        recentRepositoryStore: any RecentRepositoryStoring = UserDefaultsRecentRepositoryStore()
+    ) {
         self.service = service
+        self.recentRepositoryStore = recentRepositoryStore
+        self.recentRepositories = recentRepositoryStore.load()
     }
 
     var repositoryPath: String {
@@ -47,6 +57,19 @@ final class RepositoryViewModel: ObservableObject {
         }
     }
 
+    func chooseCloneDestination() {
+        let panel = NSOpenPanel()
+        panel.canChooseDirectories = true
+        panel.canChooseFiles = false
+        panel.allowsMultipleSelection = false
+        panel.prompt = "Choose Destination"
+        panel.message = "Select the parent folder where the new repository should be cloned."
+
+        if panel.runModal() == .OK, let url = panel.url {
+            cloneDestinationURL = url
+        }
+    }
+
     func refresh() {
         guard let folder = selectedFolderURL else {
             errorMessage = "Choose a repository first."
@@ -59,9 +82,8 @@ final class RepositoryViewModel: ObservableObject {
                 self.snapshot = snapshot
                 self.selectedFolderURL = URL(fileURLWithPath: snapshot.rootPath, isDirectory: true)
                 self.selectedBranchName = snapshot.currentBranch
-                if self.mergeBranchName.isEmpty || self.mergeBranchName == snapshot.currentBranch {
-                    self.mergeBranchName = snapshot.branches.first(where: { !$0.isCurrent })?.name ?? ""
-                }
+                self.syncMergeBranchSelections(with: snapshot)
+                self.rememberRepository(at: snapshot.rootPath)
                 self.appendLog("Loaded repository at \(snapshot.rootPath)")
             }
         }
@@ -101,13 +123,80 @@ final class RepositoryViewModel: ObservableObject {
         runGitCommand(.switchBranch(name: selectedBranchName))
     }
 
-    func mergeSelectedBranch() {
-        guard !mergeBranchName.isEmpty else {
-            errorMessage = "Choose a branch to merge into the current branch."
+    func selectRecentRepository(_ repository: RecentRepository) {
+        selectedFolderURL = URL(fileURLWithPath: repository.path, isDirectory: true)
+        appendLog("Switched to recent repository: \(repository.path)")
+        refresh()
+    }
+
+    func cloneRepository() {
+        let repositoryURL = cloneRepositoryURL.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !repositoryURL.isEmpty else {
+            errorMessage = "Paste an HTTPS or SSH repository URL first."
             return
         }
 
-        runGitCommand(.merge(branch: mergeBranchName))
+        guard let destinationFolder = cloneDestinationURL else {
+            errorMessage = "Choose a destination folder first."
+            return
+        }
+
+        runTask(label: "Clone Repository") {
+            let repositoryRoot = try self.service.cloneRepository(from: repositoryURL, into: destinationFolder)
+            let snapshot = try self.service.loadSnapshot(for: repositoryRoot)
+
+            await MainActor.run {
+                self.cloneRepositoryURL = ""
+                self.cloneDestinationURL = nil
+                self.snapshot = snapshot
+                self.selectedFolderURL = URL(fileURLWithPath: snapshot.rootPath, isDirectory: true)
+                self.selectedBranchName = snapshot.currentBranch
+                self.syncMergeBranchSelections(with: snapshot)
+                self.rememberRepository(at: snapshot.rootPath)
+                self.appendLog("Cloned \(repositoryURL) into \(snapshot.rootPath)")
+            }
+        }
+    }
+
+    func mergeSelectedBranches() {
+        let sourceBranch = mergeSourceBranchName.trimmingCharacters(in: .whitespacesAndNewlines)
+        let targetBranch = mergeTargetBranchName.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        guard !sourceBranch.isEmpty, !targetBranch.isEmpty else {
+            errorMessage = "Choose both the source and target branches."
+            return
+        }
+
+        guard sourceBranch != targetBranch else {
+            errorMessage = "Choose two different branches to merge."
+            return
+        }
+
+        guard let folder = selectedFolderURL else {
+            errorMessage = "Choose a repository first."
+            return
+        }
+
+        runTask(label: "Merge") {
+            var logEntries: [String] = []
+            if self.snapshot?.currentBranch != targetBranch {
+                let switchResult = try self.service.perform(.switchBranch(name: targetBranch), in: folder)
+                logEntries.append(self.render(command: .switchBranch(name: targetBranch), result: switchResult))
+            }
+
+            let mergeResult = try self.service.perform(.merge(branch: sourceBranch), in: folder)
+            logEntries.append("Merge \(sourceBranch) into \(targetBranch)\n\(self.renderResultOutput(mergeResult, fallback: "Merge completed successfully."))")
+
+            let snapshot = try self.service.loadSnapshot(for: folder)
+
+            await MainActor.run {
+                self.snapshot = snapshot
+                self.selectedFolderURL = URL(fileURLWithPath: snapshot.rootPath, isDirectory: true)
+                self.selectedBranchName = snapshot.currentBranch
+                self.syncMergeBranchSelections(with: snapshot, preferredSourceBranch: sourceBranch, preferredTargetBranch: targetBranch)
+                self.appendLog(logEntries.joined(separator: "\n\n"))
+            }
+        }
     }
 
     private func runGitCommand(_ command: GitCommand, afterSuccess: @escaping @MainActor () -> Void = {}) {
@@ -124,6 +213,8 @@ final class RepositoryViewModel: ObservableObject {
                 self.snapshot = snapshot
                 self.selectedFolderURL = URL(fileURLWithPath: snapshot.rootPath, isDirectory: true)
                 self.selectedBranchName = snapshot.currentBranch
+                self.syncMergeBranchSelections(with: snapshot)
+                self.rememberRepository(at: snapshot.rootPath)
                 self.appendLog(self.render(command: command, result: result))
                 afterSuccess()
             }
@@ -151,11 +242,48 @@ final class RepositoryViewModel: ObservableObject {
     }
 
     private func render(command: GitCommand, result: GitCommandResult) -> String {
+        "\(command.label)\n\(renderResultOutput(result, fallback: "\(command.label) completed successfully."))"
+    }
+
+    private func renderResultOutput(_ result: GitCommandResult, fallback: String) -> String {
         let output = result.combinedOutput.trimmingCharacters(in: .whitespacesAndNewlines)
-        if output.isEmpty {
-            return "\(command.label) completed successfully."
+        return output.isEmpty ? fallback : output
+    }
+
+    private func syncMergeBranchSelections(
+        with snapshot: GitRepositorySnapshot,
+        preferredSourceBranch: String? = nil,
+        preferredTargetBranch: String? = nil
+    ) {
+        let branchNames = Set(snapshot.branches.map(\.name))
+        let selectedOrCurrentBranch = branchNames.contains(selectedBranchName) ? selectedBranchName : snapshot.currentBranch
+        let fallbackSourceBranch = selectedOrCurrentBranch
+        let fallbackTargetBranch = snapshot.branches.first(where: { $0.name != fallbackSourceBranch })?.name ?? snapshot.currentBranch
+
+        if let preferredSourceBranch, branchNames.contains(preferredSourceBranch), preferredSourceBranch != mergeTargetBranchName {
+            mergeSourceBranchName = preferredSourceBranch
+        } else if branchNames.contains(mergeSourceBranchName), mergeSourceBranchName != mergeTargetBranchName {
+            mergeSourceBranchName = mergeSourceBranchName
+        } else {
+            mergeSourceBranchName = fallbackSourceBranch
         }
-        return "\(command.label)\n\(output)"
+
+        if let preferredTargetBranch, branchNames.contains(preferredTargetBranch), preferredTargetBranch != mergeSourceBranchName {
+            mergeTargetBranchName = preferredTargetBranch
+        } else if branchNames.contains(mergeTargetBranchName), mergeTargetBranchName != mergeSourceBranchName {
+            mergeTargetBranchName = mergeTargetBranchName
+        } else {
+            mergeTargetBranchName = fallbackTargetBranch
+        }
+
+        if mergeSourceBranchName == mergeTargetBranchName {
+            mergeTargetBranchName = snapshot.branches.first(where: { $0.name != mergeSourceBranchName })?.name ?? ""
+        }
+    }
+
+    private func rememberRepository(at repositoryPath: String) {
+        recentRepositoryStore.add(repositoryPath)
+        recentRepositories = recentRepositoryStore.load()
     }
 
     private func appendLog(_ message: String) {

@@ -3,6 +3,7 @@ import SwiftUI
 
 struct ContentView: View {
     @StateObject private var viewModel = RepositoryViewModel()
+    @State private var isCloneSheetPresented = false
 
     var body: some View {
         NavigationSplitView {
@@ -20,12 +21,20 @@ struct ContentView: View {
                 }
                 .keyboardShortcut("o", modifiers: [.command])
 
+                Button("Clone Repo") {
+                    isCloneSheetPresented = true
+                }
+                .disabled(viewModel.isBusy)
+
                 Button("Refresh") {
                     viewModel.refresh()
                 }
                 .disabled(viewModel.selectedFolderURL == nil || viewModel.isBusy)
                 .keyboardShortcut("r", modifiers: [.command])
             }
+        }
+        .sheet(isPresented: $isCloneSheetPresented) {
+            cloneSheet
         }
         .alert("Git Action Error", isPresented: Binding(
             get: { viewModel.errorMessage != nil },
@@ -63,6 +72,10 @@ struct ContentView: View {
                 }
                 .disabled(viewModel.selectedFolderURL == nil)
             }
+
+            Divider()
+
+            recentRepositoriesSection
 
             Divider()
 
@@ -114,6 +127,38 @@ struct ContentView: View {
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 28)
+    }
+
+    @ViewBuilder
+    private var recentRepositoriesSection: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text("Recent Projects")
+                .font(.headline)
+
+            if viewModel.recentRepositories.isEmpty {
+                Text("Previously opened repositories will appear here.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            } else {
+                ForEach(viewModel.recentRepositories) { repository in
+                    Button {
+                        viewModel.selectRecentRepository(repository)
+                    } label: {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(repository.name)
+                                .font(.subheadline.weight(.medium))
+                                .foregroundStyle(.primary)
+                            Text(repository.path)
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                                .lineLimit(1)
+                        }
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+        }
     }
 
     private var legacyBranchesEmptyState: some View {
@@ -211,17 +256,33 @@ struct ContentView: View {
 
     private var mergeCard: some View {
         card("Merge") {
-            Picker("Merge branch", selection: $viewModel.mergeBranchName) {
-                ForEach(viewModel.branches.filter { !$0.isCurrent }) { branch in
+            Text("Merge one branch into another. The app will switch to the target branch before running the merge when needed.")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+
+            Picker("Source branch", selection: $viewModel.mergeSourceBranchName) {
+                ForEach(viewModel.branches) { branch in
                     Text(branch.name).tag(branch.name)
                 }
             }
-            .disabled(viewModel.branches.filter { !$0.isCurrent }.isEmpty)
+            .disabled(viewModel.branches.count < 2)
 
-            Button("Merge Into Current Branch") {
-                viewModel.mergeSelectedBranch()
+            Picker("Target branch", selection: $viewModel.mergeTargetBranchName) {
+                ForEach(viewModel.branches.filter { $0.name != viewModel.mergeSourceBranchName }) { branch in
+                    Text(branch.name).tag(branch.name)
+                }
             }
-            .disabled(viewModel.isBusy || viewModel.mergeBranchName.isEmpty)
+            .disabled(viewModel.branches.count < 2)
+
+            Button("Merge Selected Branches") {
+                viewModel.mergeSelectedBranches()
+            }
+            .disabled(
+                viewModel.isBusy ||
+                viewModel.mergeSourceBranchName.isEmpty ||
+                viewModel.mergeTargetBranchName.isEmpty ||
+                viewModel.mergeSourceBranchName == viewModel.mergeTargetBranchName
+            )
         }
     }
 
@@ -278,6 +339,54 @@ struct ContentView: View {
                 endPoint: .bottomTrailing
             )
         )
+    }
+
+    private var cloneSheet: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            Text("Clone Repository")
+                .font(.title2.weight(.semibold))
+
+            TextField("https://github.com/org/repo.git or git@github.com:org/repo.git", text: $viewModel.cloneRepositoryURL)
+                .textFieldStyle(.roundedBorder)
+
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Destination Folder")
+                    .font(.headline)
+
+                HStack {
+                    Text(viewModel.cloneDestinationURL?.path ?? "No destination selected")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .textSelection(.enabled)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+
+                    Button("Choose Folder") {
+                        viewModel.chooseCloneDestination()
+                    }
+                }
+            }
+
+            HStack {
+                Spacer()
+
+                Button("Cancel") {
+                    isCloneSheetPresented = false
+                }
+
+                Button("Clone") {
+                    viewModel.cloneRepository()
+                    isCloneSheetPresented = false
+                }
+                .keyboardShortcut(.defaultAction)
+                .disabled(
+                    viewModel.isBusy ||
+                    viewModel.cloneRepositoryURL.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ||
+                    viewModel.cloneDestinationURL == nil
+                )
+            }
+        }
+        .padding(24)
+        .frame(minWidth: 520)
     }
 
     private func card<Content: View>(_ title: String, @ViewBuilder content: () -> Content) -> some View {
