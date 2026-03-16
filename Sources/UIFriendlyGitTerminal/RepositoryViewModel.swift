@@ -177,15 +177,22 @@ final class RepositoryViewModel: ObservableObject {
             return
         }
 
+        let shouldSwitchToTarget = snapshot?.currentBranch != targetBranch
+
         runTask(label: "Merge") {
             var logEntries: [String] = []
-            if self.snapshot?.currentBranch != targetBranch {
+            if shouldSwitchToTarget {
                 let switchResult = try self.service.perform(.switchBranch(name: targetBranch), in: folder)
-                logEntries.append(self.render(command: .switchBranch(name: targetBranch), result: switchResult))
+                let switchLog = await MainActor.run { self.render(command: .switchBranch(name: targetBranch), result: switchResult) }
+                logEntries.append(switchLog)
             }
 
             let mergeResult = try self.service.perform(.merge(branch: sourceBranch), in: folder)
-            logEntries.append("Merge \(sourceBranch) into \(targetBranch)\n\(self.renderResultOutput(mergeResult, fallback: "Merge completed successfully."))")
+            let mergeResultOutput = await MainActor.run {
+                let output = self.renderResultOutput(mergeResult, fallback: "Merge completed successfully.")
+                return "Merge \(sourceBranch) into \(targetBranch)\n\(output)"
+            }
+            logEntries.append(mergeResultOutput)
 
             let snapshot = try self.service.loadSnapshot(for: folder)
 

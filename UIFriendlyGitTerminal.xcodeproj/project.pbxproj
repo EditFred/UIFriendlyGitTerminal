@@ -10,6 +10,7 @@
 		A00000000000000000000016 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000009 /* ContentView.swift */; };
 		A00000000000000000000017 /* RepositoryViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0000000000000000000000A /* RepositoryViewModel.swift */; };
 		A00000000000000000000018 /* GitVibesApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0000000000000000000000B /* GitVibesApp.swift */; };
+		A00000000000000000000081 /* RecentRepositoryStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000080 /* RecentRepositoryStore.swift */; };
 		A00000000000000000000019 /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0000000000000000000000C /* Models.swift */; };
 		A0000000000000000000001A /* GitParsing.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0000000000000000000000D /* GitParsing.swift */; };
 		A0000000000000000000001B /* GitCommand.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0000000000000000000000E /* GitCommand.swift */; };
@@ -56,6 +57,7 @@
 		A00000000000000000000009 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		A0000000000000000000000A /* RepositoryViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RepositoryViewModel.swift; sourceTree = "<group>"; };
 		A0000000000000000000000B /* GitVibesApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GitVibesApp.swift; sourceTree = "<group>"; };
+		A00000000000000000000080 /* RecentRepositoryStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecentRepositoryStore.swift; sourceTree = "<group>"; };
 		A0000000000000000000000C /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
 		A0000000000000000000000D /* GitParsing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GitParsing.swift; sourceTree = "<group>"; };
 		A0000000000000000000000E /* GitCommand.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GitCommand.swift; sourceTree = "<group>"; };
@@ -130,6 +132,7 @@
 				A00000000000000000000009 /* ContentView.swift */,
 				A0000000000000000000000A /* RepositoryViewModel.swift */,
 				A0000000000000000000000B /* GitVibesApp.swift */,
+				A00000000000000000000080 /* RecentRepositoryStore.swift */,
 			);
 			path = UIFriendlyGitTerminal;
 			sourceTree = "<group>";
@@ -279,6 +282,7 @@
 				A00000000000000000000016 /* ContentView.swift in Sources */,
 				A00000000000000000000017 /* RepositoryViewModel.swift in Sources */,
 				A00000000000000000000018 /* GitVibesApp.swift in Sources */,
+				A00000000000000000000081 /* RecentRepositoryStore.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
