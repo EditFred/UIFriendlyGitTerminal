@@ -105,10 +105,12 @@ struct ContentView: View {
 
     @ViewBuilder
     private var branchesEmptyState: some View {
-        if #available(macOS 14.0, *) {
-            ModernBranchesEmptyState()
-        } else {
-            legacyBranchesEmptyState
+        Group {
+            if #available(macOS 14.0, *) {
+                ModernBranchesEmptyState()
+            } else {
+                legacyBranchesEmptyState
+            }
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 28)

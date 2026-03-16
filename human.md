@@ -1,25 +1,25 @@
 # Human Notes
 
 ## Summary
-- Updated `Sources/UIFriendlyGitTerminal/ContentView.swift` so the branch empty state uses `ContentUnavailableView` only on macOS 14 or newer and falls back to a compatible custom SwiftUI view on macOS 13.
-- Kept the empty-state copy and icon consistent across both code paths so the UI behavior stays the same on the current minimum deployment target.
-- Reviewed the other app-side SwiftUI sources involved in issue #2 and did not find additional source changes needed beyond the macOS availability fix.
+- Updated `Sources/UIFriendlyGitTerminal/ContentView.swift` for issue #3 so the branch empty-state view wraps the `if #available` split in a concrete `Group` before applying `.frame` and `.padding`.
+- This fixes the SwiftUI compile error at `ContentView.swift:113` where the modifiers were being resolved against the protocol type `View` instead of a concrete composed view.
+- Existing macOS 13 and macOS 14 empty-state behavior remains unchanged.
 
 ## HUMHERE Locations
 - `Config/AppSigning.xcconfig` — set the final app bundle identifier so it matches your signing/App Store configuration.
 - `Config/AppSigning.xcconfig` — set the Apple Developer Team ID before signing or archiving from Xcode.
 
 ## Tests
-- No new tests were added for issue #2 because the repo only has `GitVibesCoreTests`, and this fix is isolated to macOS SwiftUI view availability in the app target.
-- `xcodebuild` was attempted but could not run because the active developer directory is `/Library/Developer/CommandLineTools`, not a full Xcode installation.
-- `swift test` was attempted but failed in this environment due an external Swift toolchain/SDK mismatch and a restricted module cache path, so app-side build validation could not be completed locally.
+- No new tests were added for issue #3 because the repo only has `GitVibesCoreTests`, and this fix is isolated to SwiftUI view composition in the app target.
+- `swift test` was attempted but failed in this environment because the active Command Line Tools Swift compiler does not match the installed macOS SDK, and the process also cannot write to the default module cache path.
+- App-side compile validation therefore could not be completed locally from this sandboxed environment.
 
-## Issue #2
+## Issue #3
 
 ### What Changed
-- Reworked `Sources/UIFriendlyGitTerminal/ContentView.swift` so the macOS 14-only `ContentUnavailableView` now lives in a separate `@available(macOS 14.0, *)` view type.
-- Kept the existing macOS 13 fallback empty state in place and routed the sidebar through an `if #available(macOS 14.0, *)` check, which avoids referencing the newer symbol from the minimum-target code path.
-- Rechecked the app-side files directly related to this screen and did not find any other narrow compile-time fixes required for issue #2.
+- Wrapped the `if #available(macOS 14.0, *)` branch in `Sources/UIFriendlyGitTerminal/ContentView.swift` inside a `Group`.
+- Left the shared `.frame(maxWidth: .infinity)` and `.padding(.vertical, 28)` modifiers in place after the `Group`, which gives SwiftUI a concrete view to modify and resolves the compile failure.
+- Did not change the empty-state content or branch-loading behavior.
 
 ### Assumptions
 - The supported minimum deployment target remains macOS 13.0, as declared in both `Package.swift` and `UIFriendlyGitTerminal.xcodeproj/project.pbxproj`.
