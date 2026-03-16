@@ -70,7 +70,7 @@ struct ContentView: View {
                 .font(.headline)
 
             if viewModel.branches.isEmpty {
-                ContentUnavailableView("No branches loaded", systemImage: "point.3.connected.trianglepath.dotted")
+                branchesEmptyState
             } else {
                 List(selection: $viewModel.selectedBranchName) {
                     ForEach(viewModel.branches) { branch in
@@ -101,6 +101,34 @@ struct ContentView: View {
                 endPoint: .bottomTrailing
             )
         )
+    }
+
+    @ViewBuilder
+    private var branchesEmptyState: some View {
+        if #available(macOS 14.0, *) {
+            ModernBranchesEmptyState()
+        } else {
+            legacyBranchesEmptyState
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 28)
+    }
+
+    private var legacyBranchesEmptyState: some View {
+        VStack(spacing: 12) {
+            Image(systemName: "point.3.connected.trianglepath.dotted")
+                .font(.system(size: 28))
+                .foregroundStyle(.secondary)
+
+            Text("No branches loaded")
+                .font(.headline)
+                .multilineTextAlignment(.center)
+
+            Text("Choose a repository, or refresh the current one to load branches.")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                .multilineTextAlignment(.center)
+        }
     }
 
     private var actionPanel: some View {
@@ -262,6 +290,17 @@ struct ContentView: View {
             RoundedRectangle(cornerRadius: 20, style: .continuous)
                 .fill(Color(nsColor: .windowBackgroundColor))
                 .shadow(color: .black.opacity(0.06), radius: 14, x: 0, y: 6)
+        )
+    }
+}
+
+@available(macOS 14.0, *)
+private struct ModernBranchesEmptyState: View {
+    var body: some View {
+        ContentUnavailableView(
+            "No branches loaded",
+            systemImage: "point.3.connected.trianglepath.dotted",
+            description: Text("Choose a repository, or refresh the current one to load branches.")
         )
     }
 }
