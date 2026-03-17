@@ -20,11 +20,15 @@ import Testing
         """
          M Sources/App.swift
         ?? README.md
+        M  Sources/Committed.swift
+        MM Sources/PartiallyStaged.swift
         """
     )
 
     #expect(parsed == [
-        GitChangedFile(path: "Sources/App.swift", status: "M"),
-        GitChangedFile(path: "README.md", status: "??")
+        GitChangedFile(path: "Sources/App.swift", status: "M", isStaged: false, hasUnstagedChanges: true),
+        GitChangedFile(path: "README.md", status: "??", isStaged: false, hasUnstagedChanges: true),
+        GitChangedFile(path: "Sources/Committed.swift", status: "M", isStaged: true, hasUnstagedChanges: false),
+        GitChangedFile(path: "Sources/PartiallyStaged.swift", status: "MM", isStaged: true, hasUnstagedChanges: true)
     ])
 }

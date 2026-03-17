@@ -16,11 +16,24 @@ public struct GitChangedFile: Identifiable, Equatable, Sendable {
     public let id: String
     public let path: String
     public let status: String
+    public let isStaged: Bool
+    public let hasUnstagedChanges: Bool
 
-    public init(path: String, status: String) {
+    public var canStage: Bool {
+        hasUnstagedChanges || !isStaged
+    }
+
+    public init(
+        path: String,
+        status: String,
+        isStaged: Bool = false,
+        hasUnstagedChanges: Bool = true
+    ) {
         self.id = "\(status):\(path)"
         self.path = path
         self.status = status
+        self.isStaged = isStaged
+        self.hasUnstagedChanges = hasUnstagedChanges
     }
 }
 

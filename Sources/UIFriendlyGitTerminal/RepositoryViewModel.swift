@@ -5,11 +5,27 @@ import SwiftUI
 
 @MainActor
 final class RepositoryViewModel: ObservableObject {
+    struct OpenOption: Identifiable, Equatable {
+        let application: IDEApplication
+        let targetPath: String
+        let reason: String
+        let isRecommended: Bool
+        let isAvailable: Bool
+
+        var id: String { application.id }
+    }
+
     @Published var selectedFolderURL: URL?
     @Published var snapshot: GitRepositorySnapshot?
+    @Published private(set) var npmProjectInfo: NPMProjectInfo?
+    @Published private(set) var openOptions: [OpenOption] = []
+    @Published var npmBrowserURL = ""
     @Published var selectedBranchName = ""
     @Published var mergeSourceBranchName = ""
     @Published var mergeTargetBranchName = ""
+    @Published private(set) var postMergeDeleteBranchName: String?
+    @Published var deleteMergedBranchConfirmationText = ""
+    @Published var isDeleteMergedBranchConfirmationPresented = false
     @Published var commitMessage = ""
     @Published var cloneRepositoryURL = ""
     @Published var cloneDestinationURL: URL?
@@ -19,14 +35,26 @@ final class RepositoryViewModel: ObservableObject {
     @Published private(set) var recentRepositories: [RecentRepository]
 
     private let service: any GitRepositoryServicing
+    private let npmService: any NPMProjectServicing
+    private let openPlanner: any RepositoryOpenPlanning
     private let recentRepositoryStore: any RecentRepositoryStoring
+    private let browserOpener: any BrowserOpening
+    private let projectOpener: any IDEProjectOpening
 
     init(
         service: any GitRepositoryServicing = GitRepositoryService(),
-        recentRepositoryStore: any RecentRepositoryStoring = UserDefaultsRecentRepositoryStore()
+        npmService: any NPMProjectServicing = NPMProjectService(),
+        openPlanner: any RepositoryOpenPlanning = RepositoryOpenPlanner(),
+        recentRepositoryStore: any RecentRepositoryStoring = UserDefaultsRecentRepositoryStore(),
+        browserOpener: any BrowserOpening = BrowserOpener(),
+        projectOpener: any IDEProjectOpening = WorkspaceIDEProjectOpener()
     ) {
         self.service = service
+        self.npmService = npmService
+        self.openPlanner = openPlanner
         self.recentRepositoryStore = recentRepositoryStore
+        self.browserOpener = browserOpener
+        self.projectOpener = projectOpener
         self.recentRepositories = recentRepositoryStore.load()
     }
 
@@ -40,6 +68,45 @@ final class RepositoryViewModel: ObservableObject {
 
     var changedFiles: [GitChangedFile] {
         snapshot?.changedFiles ?? []
+    }
+
+    var stageableFiles: [GitChangedFile] {
+        changedFiles.filter(\.canStage)
+    }
+
+    var hasStagedChanges: Bool {
+        changedFiles.contains(where: \.isStaged)
+    }
+
+    var hasNPMProject: Bool {
+        npmProjectInfo != nil
+    }
+
+    var canConfirmMergedBranchDeletion: Bool {
+        normalizedDeleteMergedBranchConfirmationText == postMergeDeleteBranchName
+    }
+
+    var primaryOpenOption: OpenOption? {
+        if let recommendedAvailableOption = openOptions.first(where: { $0.isRecommended && $0.isAvailable }) {
+            return recommendedAvailableOption
+        }
+
+        if let availableOption = openOptions.first(where: \.isAvailable) {
+            return availableOption
+        }
+
+        return openOptions.first(where: \.isRecommended) ?? openOptions.first
+    }
+
+    var primaryOpenButtonTitle: String {
+        guard let option = primaryOpenOption else {
+            return "Open"
+        }
+        return "Open in \(option.application.displayName)"
+    }
+
+    func supports(_ command: NPMCommand) -> Bool {
+        npmProjectInfo?.availableScripts.contains(command) == true
     }
 
     func chooseRepository() {
@@ -79,11 +146,7 @@ final class RepositoryViewModel: ObservableObject {
         runTask(label: "Refresh") {
             let snapshot = try self.service.loadSnapshot(for: folder)
             await MainActor.run {
-                self.snapshot = snapshot
-                self.selectedFolderURL = URL(fileURLWithPath: snapshot.rootPath, isDirectory: true)
-                self.selectedBranchName = snapshot.currentBranch
-                self.syncMergeBranchSelections(with: snapshot)
-                self.rememberRepository(at: snapshot.rootPath)
+                self.applySnapshot(snapshot)
                 self.appendLog("Loaded repository at \(snapshot.rootPath)")
             }
         }
@@ -94,6 +157,38 @@ final class RepositoryViewModel: ObservableObject {
         NSWorkspace.shared.activateFileViewerSelecting([url])
     }
 
+    func openRecommendedProject() {
+        guard let option = primaryOpenOption else {
+            errorMessage = "Choose a repository first."
+            return
+        }
+
+        openProject(with: option.application)
+    }
+
+    func openProject(with application: IDEApplication) {
+        guard let option = openOptions.first(where: { $0.application == application }) else {
+            errorMessage = "Choose a repository first."
+            return
+        }
+
+        guard option.isAvailable else {
+            errorMessage = "\(application.displayName) is not available on this Mac."
+            return
+        }
+
+        do {
+            try projectOpener.openProject(
+                at: URL(fileURLWithPath: option.targetPath),
+                with: application
+            )
+            appendLog("Open in \(application.displayName)\nOpened \(option.targetPath)")
+        } catch {
+            errorMessage = error.localizedDescription
+            appendLog("Open in \(application.displayName) failed.\n\(error.localizedDescription)")
+        }
+    }
+
     func pull() {
         runGitCommand(.pull)
     }
@@ -102,14 +197,67 @@ final class RepositoryViewModel: ObservableObject {
         runGitCommand(.push)
     }
 
+    func stageAllFiles() {
+        guard !stageableFiles.isEmpty else {
+            errorMessage = "No changed files to add."
+            return
+        }
+
+        runGitCommand(.addAll)
+    }
+
+    func stageFiles(_ paths: [String]) {
+        let normalizedPaths = Array(Set(paths.map { $0.trimmingCharacters(in: .whitespacesAndNewlines) })).sorted()
+        guard !normalizedPaths.isEmpty else {
+            errorMessage = "Choose at least one file to add."
+            return
+        }
+
+        runGitCommand(.add(paths: normalizedPaths))
+    }
+
     func commit() {
-        let message = commitMessage.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !message.isEmpty else {
-            errorMessage = "Enter a commit message first."
+        guard let message = validatedCommitMessage() else {
+            return
+        }
+
+        guard hasStagedChanges else {
+            errorMessage = stageableFiles.isEmpty ? "No staged changes to commit." : "Add files before committing."
             return
         }
 
         runGitCommand(.commit(message: message)) {
+            self.commitMessage = ""
+        }
+    }
+
+    func stageAllFilesAndCommit() {
+        guard let message = validatedCommitMessage() else {
+            return
+        }
+
+        guard !stageableFiles.isEmpty else {
+            errorMessage = hasStagedChanges ? "Files are already staged. Commit them directly." : "No changed files to add."
+            return
+        }
+
+        runGitCommands([.addAll, .commit(message: message)]) {
+            self.commitMessage = ""
+        }
+    }
+
+    func stageFilesAndCommit(_ paths: [String]) {
+        guard let message = validatedCommitMessage() else {
+            return
+        }
+
+        let normalizedPaths = Array(Set(paths.map { $0.trimmingCharacters(in: .whitespacesAndNewlines) })).sorted()
+        guard !normalizedPaths.isEmpty else {
+            errorMessage = "Choose at least one file to add."
+            return
+        }
+
+        runGitCommands([.add(paths: normalizedPaths), .commit(message: message)]) {
             self.commitMessage = ""
         }
     }
@@ -148,11 +296,7 @@ final class RepositoryViewModel: ObservableObject {
             await MainActor.run {
                 self.cloneRepositoryURL = ""
                 self.cloneDestinationURL = nil
-                self.snapshot = snapshot
-                self.selectedFolderURL = URL(fileURLWithPath: snapshot.rootPath, isDirectory: true)
-                self.selectedBranchName = snapshot.currentBranch
-                self.syncMergeBranchSelections(with: snapshot)
-                self.rememberRepository(at: snapshot.rootPath)
+                self.applySnapshot(snapshot)
                 self.appendLog("Cloned \(repositoryURL) into \(snapshot.rootPath)")
             }
         }
@@ -197,35 +341,153 @@ final class RepositoryViewModel: ObservableObject {
             let snapshot = try self.service.loadSnapshot(for: folder)
 
             await MainActor.run {
-                self.snapshot = snapshot
-                self.selectedFolderURL = URL(fileURLWithPath: snapshot.rootPath, isDirectory: true)
-                self.selectedBranchName = snapshot.currentBranch
+                self.applySnapshot(snapshot)
                 self.syncMergeBranchSelections(with: snapshot, preferredSourceBranch: sourceBranch, preferredTargetBranch: targetBranch)
+                self.updatePostMergeDeleteBranchCandidate(
+                    mergedBranch: sourceBranch,
+                    targetBranch: targetBranch,
+                    snapshot: snapshot
+                )
                 self.appendLog(logEntries.joined(separator: "\n\n"))
             }
         }
     }
 
-    private func runGitCommand(_ command: GitCommand, afterSuccess: @escaping @MainActor () -> Void = {}) {
+    func promptToDeleteMergedBranch() {
+        guard postMergeDeleteBranchName != nil else { return }
+        deleteMergedBranchConfirmationText = ""
+        isDeleteMergedBranchConfirmationPresented = true
+    }
+
+    func cancelDeleteMergedBranch() {
+        deleteMergedBranchConfirmationText = ""
+        isDeleteMergedBranchConfirmationPresented = false
+    }
+
+    func deleteMergedBranch() {
+        guard let branchName = postMergeDeleteBranchName else {
+            errorMessage = "There is no merged branch ready to delete."
+            return
+        }
+
+        guard canConfirmMergedBranchDeletion else {
+            errorMessage = "Type the branch name exactly to delete it."
+            return
+        }
+
         guard let folder = selectedFolderURL else {
             errorMessage = "Choose a repository first."
             return
         }
 
-        runTask(label: command.label) {
-            let result = try self.service.perform(command, in: folder)
+        runTask(label: "Delete Branch") {
+            let result = try self.service.perform(.deleteBranch(name: branchName), in: folder)
             let snapshot = try self.service.loadSnapshot(for: folder)
 
             await MainActor.run {
-                self.snapshot = snapshot
-                self.selectedFolderURL = URL(fileURLWithPath: snapshot.rootPath, isDirectory: true)
-                self.selectedBranchName = snapshot.currentBranch
-                self.syncMergeBranchSelections(with: snapshot)
-                self.rememberRepository(at: snapshot.rootPath)
-                self.appendLog(self.render(command: command, result: result))
+                self.applySnapshot(snapshot)
+                self.postMergeDeleteBranchName = nil
+                self.cancelDeleteMergedBranch()
+                self.appendLog(self.render(command: .deleteBranch(name: branchName), result: result))
+            }
+        }
+    }
+
+    func runNPMCommand(_ command: NPMCommand) {
+        guard let projectInfo = npmProjectInfo else {
+            errorMessage = "No package.json was found in this repository."
+            return
+        }
+
+        let projectDirectory = URL(fileURLWithPath: projectInfo.projectDirectoryPath, isDirectory: true)
+
+        if command == .start {
+            runTask(label: command.label) {
+                let processIdentifier = try self.npmService.launch(command, in: projectDirectory)
+                let snapshot = try self.service.loadSnapshot(for: projectDirectory)
+
+                await MainActor.run {
+                    self.applySnapshot(snapshot)
+                    self.appendLog("\(command.label)\nStarted in background with PID \(processIdentifier).")
+                }
+            }
+            return
+        }
+
+        runTask(label: command.label) {
+            let result = try self.npmService.run(command, in: projectDirectory)
+            let snapshot = try self.service.loadSnapshot(for: projectDirectory)
+
+            await MainActor.run {
+                self.applySnapshot(snapshot)
+                self.appendLog(self.renderNPM(command: command, result: result))
+            }
+        }
+    }
+
+    func openNPMProjectInBrowser() {
+        guard hasNPMProject else {
+            errorMessage = "No package.json was found in this repository."
+            return
+        }
+
+        let trimmedURL = npmBrowserURL.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmedURL.isEmpty else {
+            errorMessage = "Enter a browser URL first."
+            return
+        }
+
+        let normalizedURL = trimmedURL.contains("://") ? trimmedURL : "http://\(trimmedURL)"
+        guard let url = URL(string: normalizedURL) else {
+            errorMessage = "Enter a valid browser URL."
+            return
+        }
+
+        browserOpener.open(url)
+        appendLog("Open Browser\nOpened \(normalizedURL)")
+    }
+
+    private func runGitCommand(_ command: GitCommand, afterSuccess: @escaping @MainActor () -> Void = {}) {
+        runGitCommands([command], afterSuccess: afterSuccess)
+    }
+
+    private func runGitCommands(_ commands: [GitCommand], afterSuccess: @escaping @MainActor () -> Void = {}) {
+        guard let folder = selectedFolderURL else {
+            errorMessage = "Choose a repository first."
+            return
+        }
+
+        let label = commands.last?.label ?? "Git"
+
+        runTask(label: label) {
+            var logEntries: [String] = []
+
+            for command in commands {
+                let result = try self.service.perform(command, in: folder)
+                let logEntry = await MainActor.run {
+                    self.render(command: command, result: result)
+                }
+                logEntries.append(logEntry)
+            }
+
+            let snapshot = try self.service.loadSnapshot(for: folder)
+
+            await MainActor.run {
+                self.applySnapshot(snapshot)
+                self.appendLog(logEntries.joined(separator: "\n\n"))
                 afterSuccess()
             }
         }
+    }
+
+    private func validatedCommitMessage() -> String? {
+        let message = commitMessage.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !message.isEmpty else {
+            errorMessage = "Enter a commit message first."
+            return nil
+        }
+
+        return message
     }
 
     private func runTask(label: String, operation: @escaping @Sendable () async throws -> Void) {
@@ -252,9 +514,70 @@ final class RepositoryViewModel: ObservableObject {
         "\(command.label)\n\(renderResultOutput(result, fallback: "\(command.label) completed successfully."))"
     }
 
+    private func renderNPM(command: NPMCommand, result: GitCommandResult) -> String {
+        "\(command.label)\n\(renderResultOutput(result, fallback: "\(command.label) completed successfully."))"
+    }
+
     private func renderResultOutput(_ result: GitCommandResult, fallback: String) -> String {
         let output = result.combinedOutput.trimmingCharacters(in: .whitespacesAndNewlines)
         return output.isEmpty ? fallback : output
+    }
+
+    private var normalizedDeleteMergedBranchConfirmationText: String {
+        deleteMergedBranchConfirmationText.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
+    private func applySnapshot(_ snapshot: GitRepositorySnapshot) {
+        if self.snapshot?.rootPath != snapshot.rootPath {
+            postMergeDeleteBranchName = nil
+            cancelDeleteMergedBranch()
+        } else if let postMergeDeleteBranchName,
+                  !snapshot.branches.contains(where: { $0.name == postMergeDeleteBranchName }) {
+            self.postMergeDeleteBranchName = nil
+            cancelDeleteMergedBranch()
+        }
+
+        self.snapshot = snapshot
+        self.selectedFolderURL = URL(fileURLWithPath: snapshot.rootPath, isDirectory: true)
+        self.selectedBranchName = snapshot.currentBranch
+        self.syncMergeBranchSelections(with: snapshot)
+        self.rememberRepository(at: snapshot.rootPath)
+        self.reloadOpenOptions(for: snapshot)
+        self.reloadNPMProjectInfo(for: snapshot)
+    }
+
+    private func reloadOpenOptions(for snapshot: GitRepositorySnapshot) {
+        do {
+            let plan = try openPlanner.planOpenOptions(
+                for: URL(fileURLWithPath: snapshot.rootPath, isDirectory: true)
+            )
+            openOptions = plan.options.map { option in
+                OpenOption(
+                    application: option.application,
+                    targetPath: option.targetPath,
+                    reason: option.reason,
+                    isRecommended: option.isRecommended,
+                    isAvailable: projectOpener.isAvailable(option.application)
+                )
+            }
+        } catch {
+            openOptions = []
+            appendLog("Open Project\n\(error.localizedDescription)")
+        }
+    }
+
+    private func reloadNPMProjectInfo(for snapshot: GitRepositorySnapshot) {
+        do {
+            let projectInfo = try npmService.inspectProject(
+                in: URL(fileURLWithPath: snapshot.rootPath, isDirectory: true)
+            )
+            npmProjectInfo = projectInfo
+            npmBrowserURL = projectInfo?.suggestedBrowserURL ?? ""
+        } catch {
+            npmProjectInfo = nil
+            npmBrowserURL = ""
+            appendLog("NPM Support\n\(error.localizedDescription)")
+        }
     }
 
     private func syncMergeBranchSelections(
@@ -286,6 +609,26 @@ final class RepositoryViewModel: ObservableObject {
         if mergeSourceBranchName == mergeTargetBranchName {
             mergeTargetBranchName = snapshot.branches.first(where: { $0.name != mergeSourceBranchName })?.name ?? ""
         }
+    }
+
+    private func updatePostMergeDeleteBranchCandidate(
+        mergedBranch: String,
+        targetBranch: String,
+        snapshot: GitRepositorySnapshot
+    ) {
+        guard targetBranch == "main" else {
+            postMergeDeleteBranchName = nil
+            cancelDeleteMergedBranch()
+            return
+        }
+
+        // HUMHERE: Confirm whether this post-merge cleanup should stay limited to local branch deletion after merges into `main`, or later expand to support remote deletion and non-`main` targets.
+        if snapshot.branches.contains(where: { $0.name == mergedBranch }) {
+            postMergeDeleteBranchName = mergedBranch
+        } else {
+            postMergeDeleteBranchName = nil
+        }
+        cancelDeleteMergedBranch()
     }
 
     private func rememberRepository(at repositoryPath: String) {

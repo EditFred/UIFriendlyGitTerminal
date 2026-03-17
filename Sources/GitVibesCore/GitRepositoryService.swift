@@ -33,27 +33,7 @@ public struct ProcessRunner: ShellCommandRunning {
     public init() {}
 
     public func run(arguments: [String], workingDirectory: URL?) throws -> GitCommandResult {
-        let process = Process()
-        let stdoutPipe = Pipe()
-        let stderrPipe = Pipe()
-
-        process.executableURL = URL(fileURLWithPath: "/usr/bin/env")
-        process.arguments = ["git"] + arguments
-        process.currentDirectoryURL = workingDirectory
-        process.standardOutput = stdoutPipe
-        process.standardError = stderrPipe
-
-        try process.run()
-        process.waitUntilExit()
-
-        let standardOutput = String(decoding: stdoutPipe.fileHandleForReading.readDataToEndOfFile(), as: UTF8.self)
-        let standardError = String(decoding: stderrPipe.fileHandleForReading.readDataToEndOfFile(), as: UTF8.self)
-
-        return GitCommandResult(
-            standardOutput: standardOutput,
-            standardError: standardError,
-            terminationStatus: process.terminationStatus
-        )
+        try run(executableName: "git", arguments: arguments, workingDirectory: workingDirectory)
     }
 }
 

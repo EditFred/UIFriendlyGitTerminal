@@ -1,16 +1,22 @@
 # Human Notes
 
 ## Summary
-- Implemented issue #4 across the macOS app UI, view model, and git service.
-- Added a recent-projects quick-switch section in the left repository panel, backed by persisted repository roots.
-- Reworked merge so users choose both branches explicitly as `source -> target`, with the first picker auto-filled from the currently selected branch.
-- Added a toolbar-driven clone flow that accepts an HTTPS or SSH remote URL plus a destination folder, then opens the cloned repository automatically.
-- Added tests for clone command/service behavior and view-model coverage for refresh, explicit merge flow, and cloning.
+- Issue #6: added npm project detection, script execution, background `npm start`, and a browser-launch affordance driven by `package.json` scripts.
+- Issue #7: added repository open planning plus app-side “Open in …” actions for Xcode, VS Code, Cursor, and Codex with availability checks and a recommended default.
+- Issue #8: after merging a branch into `main`, the UI now offers a typed-confirmation flow to delete the merged local branch.
+- Issue #9: the Commit panel now supports explicit staging before commit with `Add All`, a file-selection sheet, and a commit-time prompt when nothing is staged yet.
+- Parsed git status entries now track staged vs unstaged state so the commit flow can avoid redundant `git add` work and block empty commits earlier.
+- Added tests for npm support, repository open planning, merged-branch cleanup, and guarded staging/commit flows.
 
 ## HUMHERE Locations
-- `Config/AppSigning.xcconfig` — provide the final bundle identifier used for local signing or App Store distribution.
-- `Config/AppSigning.xcconfig` — provide the Apple Developer Team ID before signing or archiving.
-- `Sources/UIFriendlyGitTerminal/RecentRepositoryStore.swift` — adjust the maximum number of quick-switch recent repositories if product requirements change.
+- `Sources/GitVibesCore/NPMProjectService.swift` — confirm whether default browser launch should stay on `http://localhost:3000` when no port can be inferred from `package.json`.
+- `Sources/GitVibesCore/NPMProjectService.swift` — decide whether detached `npm start` is sufficient or if the app should later capture and surface long-running dev-server logs.
+- `Sources/GitVibesCore/RepositoryOpenPlanner.swift` — confirm whether Swift packages without Xcode metadata should still recommend Xcode first or switch to an editor-first default.
+- `Sources/UIFriendlyGitTerminal/IDEProjectOpening.swift` — confirm the production Codex macOS bundle identifier if app discovery should key off something other than `com.openai.codex`.
+- `Sources/UIFriendlyGitTerminal/RepositoryViewModel.swift` — decide whether the post-merge cleanup flow should stay limited to local deletion after merges into `main` or expand to remote deletion and other target branches.
+- `Sources/UIFriendlyGitTerminal/ContentView.swift` — `// HUMHERE` confirm whether the stage-selection sheet should default to all stageable files selected or start empty.
+- `Sources/UIFriendlyGitTerminal/ContentView.swift` — decide whether the commit-time staging prompt should bias toward `Add All and Commit` or `Select Files to Add`.
+- `Sources/UIFriendlyGitTerminal/ContentView.swift` — confirm typed branch-name entry should remain mandatory for destructive branch deletion instead of a lighter acknowledgement.
 
 ## Verification
-- `swift test` was attempted, but this environment cannot complete Swift package builds because the active compiler does not match the installed macOS SDK and the sandbox cannot write to the default module cache path.
+- `DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer CLANG_MODULE_CACHE_PATH=/tmp/clang-module-cache swift test --disable-sandbox` passed on March 17, 2026.

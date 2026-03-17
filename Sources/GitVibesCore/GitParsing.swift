@@ -30,13 +30,22 @@ public enum GitParsing {
                     return nil
                 }
 
-                let status = String(rawLine.prefix(2)).trimmingCharacters(in: .whitespaces)
+                let rawStatus = String(rawLine.prefix(2))
+                let statusCharacters = Array(rawStatus)
+                let indexStatus = statusCharacters.first ?? " "
+                let workingTreeStatus = statusCharacters.dropFirst().first ?? " "
+                let status = rawStatus.trimmingCharacters(in: .whitespaces)
                 let path = String(rawLine.dropFirst(3)).trimmingCharacters(in: .whitespaces)
                 guard !path.isEmpty else {
                     return nil
                 }
 
-                return GitChangedFile(path: path, status: status.isEmpty ? "--" : status)
+                return GitChangedFile(
+                    path: path,
+                    status: status.isEmpty ? "--" : status,
+                    isStaged: indexStatus != " " && indexStatus != "?",
+                    hasUnstagedChanges: workingTreeStatus != " "
+                )
             }
     }
 }
