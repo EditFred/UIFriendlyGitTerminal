@@ -1,6 +1,6 @@
 import Foundation
 
-public enum NPMCommand: String, CaseIterable, Equatable, Sendable {
+public enum NPMCommand: String, CaseIterable, Equatable, Hashable, Sendable {
     case test
     case build
     case start
@@ -28,6 +28,13 @@ public enum NPMCommand: String, CaseIterable, Equatable, Sendable {
     }
 
     public var scriptName: String {
-        rawValue
+        switch self {
+        case .test:
+            return "test"
+        case .build:
+            return "build"
+        case .start:
+            return "start"
+        }
     }
 }

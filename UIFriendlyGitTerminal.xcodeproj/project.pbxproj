@@ -1,16 +1,17 @@
 // !$*UTF8*$!
 {
-	objectVersion = 56;
+	archiveVersion = 1;
 	classes = {
 	};
-	archiveVersion = 1;
+	objectVersion = 56;
 	objects = {
 
 /* Begin PBXBuildFile section */
+		9172A1B42F6974F0007F4B3C /* NPMCommand.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9172A1B32F6974F0007F4B3C /* NPMCommand.swift */; };
+		9172A1B62F6974F1007F4B3C /* RepositorySupportServices.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9172A1B52F6974F1007F4B3C /* RepositorySupportServices.swift */; };
 		A00000000000000000000016 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000009 /* ContentView.swift */; };
 		A00000000000000000000017 /* RepositoryViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0000000000000000000000A /* RepositoryViewModel.swift */; };
 		A00000000000000000000018 /* GitVibesApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0000000000000000000000B /* GitVibesApp.swift */; };
-		A00000000000000000000081 /* RecentRepositoryStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000080 /* RecentRepositoryStore.swift */; };
 		A00000000000000000000019 /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0000000000000000000000C /* Models.swift */; };
 		A0000000000000000000001A /* GitParsing.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0000000000000000000000D /* GitParsing.swift */; };
 		A0000000000000000000001B /* GitCommand.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0000000000000000000000E /* GitCommand.swift */; };
@@ -20,6 +21,7 @@
 		A0000000000000000000001F /* GitParsingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000010 /* GitParsingTests.swift */; };
 		A00000000000000000000020 /* GitCommandTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000011 /* GitCommandTests.swift */; };
 		A00000000000000000000021 /* GitVibesCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A00000000000000000000013 /* GitVibesCore.framework */; };
+		A00000000000000000000081 /* RecentRepositoryStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000080 /* RecentRepositoryStore.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -54,10 +56,11 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		9172A1B32F6974F0007F4B3C /* NPMCommand.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NPMCommand.swift; sourceTree = "<group>"; };
+		9172A1B52F6974F1007F4B3C /* RepositorySupportServices.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RepositorySupportServices.swift; sourceTree = "<group>"; };
 		A00000000000000000000009 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		A0000000000000000000000A /* RepositoryViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RepositoryViewModel.swift; sourceTree = "<group>"; };
 		A0000000000000000000000B /* GitVibesApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GitVibesApp.swift; sourceTree = "<group>"; };
-		A00000000000000000000080 /* RecentRepositoryStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecentRepositoryStore.swift; sourceTree = "<group>"; };
 		A0000000000000000000000C /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
 		A0000000000000000000000D /* GitParsing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GitParsing.swift; sourceTree = "<group>"; };
 		A0000000000000000000000E /* GitCommand.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GitCommand.swift; sourceTree = "<group>"; };
@@ -68,6 +71,7 @@
 		A00000000000000000000013 /* GitVibesCore.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = GitVibesCore.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		A00000000000000000000014 /* UIFriendlyGitTerminal.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = UIFriendlyGitTerminal.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A00000000000000000000015 /* GitVibesCoreTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = GitVibesCoreTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		A00000000000000000000080 /* RecentRepositoryStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecentRepositoryStore.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -133,6 +137,7 @@
 				A0000000000000000000000A /* RepositoryViewModel.swift */,
 				A0000000000000000000000B /* GitVibesApp.swift */,
 				A00000000000000000000080 /* RecentRepositoryStore.swift */,
+				9172A1B52F6974F1007F4B3C /* RepositorySupportServices.swift */,
 			);
 			path = UIFriendlyGitTerminal;
 			sourceTree = "<group>";
@@ -144,6 +149,7 @@
 				A0000000000000000000000D /* GitParsing.swift */,
 				A0000000000000000000000E /* GitCommand.swift */,
 				A0000000000000000000000F /* GitRepositoryService.swift */,
+				9172A1B32F6974F0007F4B3C /* NPMCommand.swift */,
 			);
 			path = GitVibesCore;
 			sourceTree = "<group>";
@@ -280,6 +286,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				A00000000000000000000016 /* ContentView.swift in Sources */,
+				9172A1B62F6974F1007F4B3C /* RepositorySupportServices.swift in Sources */,
 				A00000000000000000000017 /* RepositoryViewModel.swift in Sources */,
 				A00000000000000000000018 /* GitVibesApp.swift in Sources */,
 				A00000000000000000000081 /* RecentRepositoryStore.swift in Sources */,
@@ -294,6 +301,7 @@
 				A0000000000000000000001A /* GitParsing.swift in Sources */,
 				A0000000000000000000001B /* GitCommand.swift in Sources */,
 				A0000000000000000000001C /* GitRepositoryService.swift in Sources */,
+				9172A1B42F6974F0007F4B3C /* NPMCommand.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
